@@ -1,0 +1,50 @@
+- name: Update apt and install required packages
+  apt:
+    name:
+      - libevent-dev
+      - ncurses-dev
+      - build-essential
+      - bison
+      - pkg-config
+    state: present
+    update_cache: yes
+
+- name: Check if tmux directory exists
+  stat:
+    path: '/tmp/tmux'
+  register: tmux_dir
+
+- name: Clone tmux from the GitHub repository if it doesn't exist
+  git:
+    repo: 'https://github.com/tmux/tmux.git'
+    dest: '/tmp/tmux'
+    clone: yes
+    update: no
+  when: not tmux_dir.stat.exists
+
+- name: Fetch updates from remote repository
+  command: git fetch origin master
+  args:
+    chdir: '/tmp/tmux'
+  ignore_errors: true
+
+- name: Compare local and remote master branches
+  command: git diff --quiet origin/master
+  args:
+    chdir: '/tmp/tmux'
+  register: diff_output
+  ignore_errors: true
+
+- name: Check if tmux is already installed
+  command: which tmux
+  register: tmux_installed
+  ignore_errors: true
+
+- name: Build and install tmux
+  shell:
+    chdir: '/tmp/tmux'
+    cmd: |
+      sh autogen.sh
+      ./configure
+      make -j$(nproc) && make install
+  when: tmux_installed.rc != 0 or diff_output.rc != 0

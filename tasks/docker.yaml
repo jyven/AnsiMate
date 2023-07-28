@@ -1,0 +1,38 @@
+- name: remove old packages
+  apt:
+    name: docker.io, docker-doc, docker-compose, podman-docker, containerd, runc
+    state: absent
+
+- name: Install prerequisite packages
+  apt:
+    name: "ca-certificates, curl, gnupg"
+    state: present
+    update_cache: true
+
+- name: Ensure directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download GPG key with curl
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /tmp/docker.gpg
+    creates: /tmp/docker.gpg
+
+- name: De-armor and save the GPG key
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker.gpg
+    creates: /etc/apt/keyrings/docker.gpg
+
+- name: Add Docker apt repository
+  ansible.builtin.shell:
+    cmd: |
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    creates: /etc/apt/sources.list.d/docker.list
+
+- name: Install Docker and related packages
+  apt:
+    name: "docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin"
+    state: present
+    update_cache: true

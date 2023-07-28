@@ -1,0 +1,16 @@
+- name: Install pyenv
+  ansible.builtin.shell: >
+    curl https://pyenv.run | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.pyenv"
+
+- name: Ensure pyenv lines are in bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: '{{ item }}'
+    state: present
+  loop:
+    - 'export PATH="$HOME/.pyenv/bin:$PATH"'
+    - 'eval "$(pyenv init --path)"'
+    - 'eval "$(pyenv virtualenv-init -)"'
+

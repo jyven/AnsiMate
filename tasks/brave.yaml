@@ -1,0 +1,12 @@
+- name: Download Brave Browser keyring
+  command: curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+
+- name: Add Brave Browser to sources list
+  command: >
+    bash -c "echo 'deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main' > /etc/apt/sources.list.d/brave-browser-release.list"
+
+- name: Install Brave Browser
+  apt:
+    name: brave-browser
+    state: latest
+    update_cache: true
