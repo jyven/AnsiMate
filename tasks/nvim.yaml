@@ -1,0 +1,44 @@
+- name: Install build prerequisites
+  apt:
+    name: "ninja-build, gettext, cmake, unzip, curl, git"
+    state: present
+    update_cache: yes
+
+- name: Check if neovim directory exists
+  stat:
+    path: '/tmp/neovim'
+  register: neovim_dir
+
+- name: Clone neovim from the GitHub repository if it doesn't exist
+  git:
+    repo: 'https://github.com/neovim/neovim'
+    dest: '/tmp/neovim_dir'
+    clone: yes
+    update: no
+  when: not neovim_dir.stat.exists
+
+- name: Fetch updates from remote repository
+  command: git fetch origin master
+  args:
+    chdir: '/tmp/neovim_dir'
+  ignore_errors: true
+
+- name: Compare local and remote master branches
+  command: git diff --quiet origin/master
+  args:
+    chdir: '/tmp/neovim_dir'
+  register: diff_output
+  ignore_errors: true
+
+- name: Check if neovim is already installed
+  command: which neovim
+  register: neovim_installed
+  ignore_errors: true
+
+- name: Build and install neovim
+  shell:
+    chdir: '/tmp/neovim_dir'
+    cmd: |
+      make -j$(nproc) CMAKE_BUILD_TYPE=RelWithDebInfo
+      sudo make install
+  when: neovim_installed.rc != 0 or diff_output.rc != 0

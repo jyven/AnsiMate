@@ -10,18 +10,22 @@
         update_cache: true
 
   tasks:
-    - include_tasks: tasks/brave.yaml
+    - include_tasks: tasks/nvim.yaml
       args:
         apply:
           become: yes
-    - include_tasks: tasks/tmux.yaml
-      args:
-        apply:
-          become: yes
-    - include_tasks: tasks/pyenv.yaml
-    - include_tasks: tasks/nvm.yaml
-    - include_tasks: tasks/docker.yaml
-      args:
-        apply:
-          become: yes
+    # - include_tasks: tasks/brave.yaml
+    #   args:
+    #     apply:
+    #       become: yes
+    # - include_tasks: tasks/tmux.yaml
+    #   args:
+    #     apply:
+    #       become: yes
+    # - include_tasks: tasks/pyenv.yaml
+    # - include_tasks: tasks/nvm.yaml
+    # - include_tasks: tasks/docker.yaml
+    #   args:
+    #     apply:
+    #       become: yes
 
